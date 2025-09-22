@@ -1,0 +1,15 @@
+// step 1: get the cli arguments
+import cli,shell
+
+let args = cli.getArgs()
+
+let binPath = args[0]
+
+let command = "sudo mv "+binPath+" /usr/local/bin/"
+// println(command) // check the command
+// step 2: execute the command with sudo
+if (shell.run(command)) {
+    success "moved to /usr/local/bin/"
+} else {
+    error "failed to move to /usr/local/bin/"
+}
