@@ -1,9 +1,13 @@
 // step 1: get the cli arguments
-import cli,shell
+import cli,shell,os
 
 let args = cli.getArgs()
 
 let binPath = args[0]
+if (binPath == "" || binPath == null) {
+    error "please provide the path to the binary"
+    os.exit(1)  // Exit with status code 1
+}
 
 let command = "sudo mv "+binPath+" /usr/local/bin/"
 // println(command) // check the command
