@@ -4,7 +4,10 @@ import cli,shell,os
 const args = cli.getArgs()
 
 const binPath = args[0] 
- 
+// HERE i assume that the bin path actually just the binaries name
+// e.g. movebin
+// and that the binary is in the current working directory
+//TODO: check if the binary exists in the current working directory 
 if (binPath == "" || binPath == null) {
     error "please provide the path to the binary"
     os.exit(1)  // Exit with status code 1
