@@ -39,10 +39,10 @@ let existsInCWD = IsExists("./"+binPath) //Seems to be an error in vint lang doe
 //     os.exit(1)
 // }
 
-// ExitWithError(
-//     not(existsInCWD), 
-//     "The binary "+binPath+" does not exist in the current working directory" 
-// )
+ExitWithError(
+    not(existsInCWD), 
+    "The binary "+binPath+" does not exist in the current working directory" 
+)
 
 const destPath = "/usr/local/bin/"+binPath
 if (IsExists(destPath)) {
