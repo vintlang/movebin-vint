@@ -2,27 +2,37 @@ import cli,shell,os
 
 const args = cli.getArgs()
 
+let IsExists = func(path) { // show casing vint function usage
+    return os.fileExists(path) 
+}
+
+let ExitWithError = func(shouldExit,message) {
+    if (shouldExit) {
+        error message
+        os.exit(1)
+    }
+}
+
 const binPath = args[0] 
 // HERE i assume that the bin path actually just the binaries name
 // e.g. movebin
 // and that the binary is in the current working directory
-
 const destPath = "/usr/local/bin/"+binPath
 //This will not work if the binary is not in the current working directory
 
 if (binPath == "" || binPath == null) {
-    error "please provide the path to the binary"
+    error "Please provide the path to the binary"
     os.exit(1)  // Exit with status code 1
 }
 let existsInCWD = os.fileExists(binPath) //Seems to be an error in vint lang does not seem to store the value in the variable
-if (not(existsInCWD)) { // Or might  be the if statement that's broken
-    error "the binary "+binPath+" does not exist in the current working directory"
+if (not(existsInCWD)) { // Or might  be the if statement that's broken since '!existsInCWD' also does not work but 'not(existsInCWD)' works
+    error "The binary "+binPath+" does not exist in the current working directory"
     os.exit(1)
 }
 
 let command = "sudo mv "+binPath+" /usr/local/bin/"
 if (shell.run(command)) {
-    success "moved to /usr/local/bin/"
+    success "Moved to /usr/local/bin/"
 } else {
-    error "failed to move to /usr/local/bin/"
+    error "Failed to move to /usr/local/bin/"
 }
