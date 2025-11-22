@@ -1,24 +1,67 @@
-// step 1: get the cli arguments
-import cli,shell,os
+import cli,shell,os,term
 
 const args = cli.getArgs()
+
+let IsExists = func(path) { // show casing vint function usage
+    println({"Checking if path exists":path})
+    return os.fileExists(path) 
+}
+
+let ExitWithError = func(shouldExit,message) {
+    // println({"shouldExit":shouldExit})
+    if (shouldExit) {
+        error message
+        os.exit(1)
+    }
+}
 
 const binPath = args[0] 
 // HERE i assume that the bin path actually just the binaries name
 // e.g. movebin
 // and that the binary is in the current working directory
-//TODO: check if the binary exists in the current working directory 
+
+//This will not work if the binary is not in the current working directory
 if (binPath == "" || binPath == null) {
-    error "please provide the path to the binary"
+    error "Please provide the path to the binary"
     os.exit(1)  // Exit with status code 1
 }
 
+
+// ExitWithError( 
+//     or(binPath == "", binPath == null),
+//     "Please provide the path to the binary" 
+// )
+
+let existsInCWD = IsExists("./"+binPath) //Seems to be an error in vint lang does not seem to store the value in the variable
+
+// if (not(existsInCWD)) { // Or might  be the if statement that's broken since '!existsInCWD' also does not work but 'not(existsInCWD)' works
+//     error "The binary "+binPath+" does not exist in the current working directory"
+//     os.exit(1)
+// }
+
+ExitWithError(
+    not(existsInCWD), 
+    "The binary "+binPath+" does not exist in the current working directory" 
+)
+
+const destPath = "/usr/local/bin/"+binPath
+if (IsExists(destPath)) {
+    warn "The binary "+binPath+" already exists in /usr/local/bin/"
+    if (not(term.confirm("Do you want to overwrite it?"))) {
+        info "Aborting..."
+        os.exit(0)
+    } else {
+        info "Overwriting..."
+        if( not(shell.run("sudo rm "+destPath)) ) {
+            error "Failed to remove existing binary"
+            os.exit(1)
+        }
+    }
+}
+
 let command = "sudo mv "+binPath+" /usr/local/bin/"
-const exists = os.fileExists("example.txt")
-// println(command) // check the command
-// step 2: execute the command with sudo
 if (shell.run(command)) {
-    success "moved to /usr/local/bin/"
+    success "Moved to /usr/local/bin/"
 } else {
-    error "failed to move to /usr/local/bin/"
+    error "Failed to move to /usr/local/bin/"
 }
