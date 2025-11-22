@@ -3,6 +3,7 @@ import cli,shell,os,term
 const args = cli.getArgs()
 
 let IsExists = func(path) { // show casing vint function usage
+    println({"Checking if path exists":path})
     return os.fileExists(path) 
 }
 
@@ -31,7 +32,7 @@ if (binPath == "" || binPath == null) {
 //     "Please provide the path to the binary" 
 // )
 
-let existsInCWD = IsExists(binPath) //Seems to be an error in vint lang does not seem to store the value in the variable
+let existsInCWD = IsExists("./"+binPath) //Seems to be an error in vint lang does not seem to store the value in the variable
 
 // if (not(existsInCWD)) { // Or might  be the if statement that's broken since '!existsInCWD' also does not work but 'not(existsInCWD)' works
 //     error "The binary "+binPath+" does not exist in the current working directory"
