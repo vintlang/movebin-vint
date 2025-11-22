@@ -1,4 +1,4 @@
-import cli,shell,os
+import cli,shell,os,term
 
 const args = cli.getArgs()
 
@@ -18,7 +18,7 @@ const binPath = args[0]
 // HERE i assume that the bin path actually just the binaries name
 // e.g. movebin
 // and that the binary is in the current working directory
-const destPath = "/usr/local/bin/"+binPath
+
 //This will not work if the binary is not in the current working directory
 if (binPath == "" || binPath == null) {
     error "Please provide the path to the binary"
@@ -42,6 +42,21 @@ ExitWithError(
     not(existsInCWD), 
     "The binary "+binPath+" does not exist in the current working directory" 
 )
+
+const destPath = "/usr/local/bin/"+binPath
+if (IsExists(destPath)) {
+    warn "The binary "+binPath+" already exists in /usr/local/bin/"
+    if (not(term.confirm("Do you want to overwrite it? (y/n) "))) {
+        info "Aborting..."
+        os.exit(0)
+    } else {
+        info "Overwriting..."
+        if( not(shell.run("sudo rm "+destPath)) ) {
+            error "Failed to remove existing binary"
+            os.exit(1)
+        }
+    }
+}
 
 let command = "sudo mv "+binPath+" /usr/local/bin/"
 if (shell.run(command)) {
