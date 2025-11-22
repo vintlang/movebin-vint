@@ -7,14 +7,23 @@ const binPath = args[0]
 // HERE i assume that the bin path actually just the binaries name
 // e.g. movebin
 // and that the binary is in the current working directory
+
+const destPath = "/usr/local/bin/"+binPath
+//This will not work if the binary is not in the current working directory
+
 //TODO: check if the binary exists in the current working directory 
+
 if (binPath == "" || binPath == null) {
     error "please provide the path to the binary"
     os.exit(1)  // Exit with status code 1
 }
+const existsInCWD = os.fileExists(binPath)
+if (!existsInCWD) {
+    error "the binary "+binPath+" does not exist in the current working directory"
+    os.exit(1)
+}
 
 let command = "sudo mv "+binPath+" /usr/local/bin/"
-const exists = os.fileExists("example.txt")
 // println(command) // check the command
 // step 2: execute the command with sudo
 if (shell.run(command)) {
