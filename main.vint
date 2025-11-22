@@ -3,13 +3,15 @@ import cli,shell,os
 
 const args = cli.getArgs()
 
-const binPath = args[0]
+const binPath = args[0] 
+ 
 if (binPath == "" || binPath == null) {
     error "please provide the path to the binary"
     os.exit(1)  // Exit with status code 1
 }
 
 let command = "sudo mv "+binPath+" /usr/local/bin/"
+const exists = os.fileExists("example.txt")
 // println(command) // check the command
 // step 2: execute the command with sudo
 if (shell.run(command)) {
