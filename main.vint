@@ -1,67 +1,34 @@
-import cli,shell,os,term
+import cli, shell, os, term
 
-const args = cli.getArgs()
+let main = func() {
+    let args: []string = cli.getArgs();
 
-let IsExists = func(path) { // show casing vint function usage
-    println({"Checking if path exists":path})
-    return os.fileExists(path) 
-}
+    if (::len(args) == 0) {
+        error "Please provide the path to the binary";
+    };
 
-let ExitWithError = func(shouldExit,message) {
-    // println({"shouldExit":shouldExit})
-    if (shouldExit) {
-        error message
-        os.exit(1)
-    }
-}
+    let binPath: string = args[0];
 
-const binPath = args[0] 
-// HERE i assume that the bin path actually just the binaries name
-// e.g. movebin
-// and that the binary is in the current working directory
+    let existsInCWD: bool = os.fileExists(binPath);
 
-//This will not work if the binary is not in the current working directory
-if (binPath == "" || binPath == null) {
-    error "Please provide the path to the binary"
-    os.exit(1)  // Exit with status code 1
-}
+    if (::not(existsInCWD)) {
+        error "The binary " + binPath + " does not exist in the current working directory";
+    };
 
+    let destPath: string = "/usr/local/bin/" + binPath;
 
-// ExitWithError( 
-//     or(binPath == "", binPath == null),
-//     "Please provide the path to the binary" 
-// )
+    if (os.fileExists(destPath)) {
+        warn "The binary " + binPath + " already exists in /usr/local/bin/";
 
-let existsInCWD = IsExists("./"+binPath) //Seems to be an error in vint lang does not seem to store the value in the variable
+        if (::not(term.confirm("Do you want to overwrite it?"))) {
+            info "Aborting...";
+            return nil;
+        };
 
-// if (not(existsInCWD)) { // Or might  be the if statement that's broken since '!existsInCWD' also does not work but 'not(existsInCWD)' works
-//     error "The binary "+binPath+" does not exist in the current working directory"
-//     os.exit(1)
-// }
+        info "Overwriting...";
+        shell.run("sudo rm " + destPath);
+    };
 
-ExitWithError(
-    not(existsInCWD), 
-    "The binary "+binPath+" does not exist in the current working directory" 
-)
-
-const destPath = "/usr/local/bin/"+binPath
-if (IsExists(destPath)) {
-    warn "The binary "+binPath+" already exists in /usr/local/bin/"
-    if (not(term.confirm("Do you want to overwrite it?"))) {
-        info "Aborting..."
-        os.exit(0)
-    } else {
-        info "Overwriting..."
-        if( not(shell.run("sudo rm "+destPath)) ) {
-            error "Failed to remove existing binary"
-            os.exit(1)
-        }
-    }
-}
-
-let command = "sudo mv "+binPath+" /usr/local/bin/"
-if (shell.run(command)) {
-    success "Moved to /usr/local/bin/"
-} else {
-    error "Failed to move to /usr/local/bin/"
-}
+    shell.run("sudo mv " + binPath + " " + destPath);
+    success "Moved to /usr/local/bin/";
+};
