@@ -1,5 +1,7 @@
 {
   "name": "movebin",
   "version": "1.0.0",
-  "description": "I love VintLang"
+  "description": "Move binaries to /usr/local/bin/ with backup and chmod support",
+  "author": "Tachera W",
+  "homepage": "https://github.com/vintlang/movebin-vint"
 }

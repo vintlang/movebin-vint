@@ -1,0 +1,40 @@
+import os, shell, string
+
+package file_ops {
+    let exists = func(path: string): bool {
+        return os.fileExists(path);
+    };
+
+    let copyFile = func(src: string, dest: string) {
+        os.copy(src, dest);
+    };
+
+    let deleteFile = func(path: string) {
+        os.deleteFile(path);
+    };
+
+    let makeExecutable = func(path: string) {
+        os.chmod(path, 493);
+    };
+
+    let getBasename = func(path: string): string {
+        let parts: []string = string.split(path, "/");
+        return parts[::len(parts) - 1];
+    };
+
+    let backupAndRemoveExisting = func(destPath: string): string {
+        let backupDir: string = "/usr/local/bin/.movebin_backups";
+        os.mkdirAll(backupDir, 493);
+
+        let ts: string = shell.run("printf '%s' $(date +%s)");
+
+        let baseName: string = getBasename(destPath);
+        let backupName: string = ts + "_" + baseName;
+        let backupPath: string = backupDir + "/" + backupName;
+
+        os.copy(destPath, backupPath);
+        os.deleteFile(destPath);
+
+        return backupPath;
+    };
+};

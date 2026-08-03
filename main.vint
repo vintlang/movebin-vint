@@ -1,34 +1,97 @@
-import cli, shell, os, term
+import cli, term, file_ops
+
+const VERSION: string = "1.0.0";
+const DEST_DIR: string = "/usr/local/bin";
+
+const HELP_TEXT = "Usage: sudo vint main.vint <binary_path> [OPTIONS]
+
+Options:
+  -o, --output <name>   Set a custom binary name (default: basename of source)
+  -f, --force           Force overwrite without prompting
+  --no-backup           Skip backup creation before overwriting
+  -h, --help            Show this help message
+  -v, --version         Show version information
+
+Examples:
+  sudo vint main.vint my-tool
+  sudo vint main.vint my-tool -o custom
+  sudo vint main.vint my-tool -o tool -f
+  sudo vint main.vint my-tool --no-backup
+";
+
+let hasFlag = func(name: string): bool {
+    return cli.hasArg(name);
+};
+
+let getFlagValue = func(name: string): string {
+    let val = cli.getArgValue(name);
+    if (val == null) {
+        return "";
+    };
+    return val;
+};
 
 let main = func() {
-    let args: []string = cli.getArgs();
-
-    if (::len(args) == 0) {
-        error "Please provide the path to the binary";
+    if (hasFlag("-h") || hasFlag("--help")) {
+        ::println(HELP_TEXT);
+        return null;
     };
 
-    let binPath: string = args[0];
-
-    let existsInCWD: bool = os.fileExists(binPath);
-
-    if (::not(existsInCWD)) {
-        error "The binary " + binPath + " does not exist in the current working directory";
+    if (hasFlag("-v") || hasFlag("--version")) {
+        ::println("movebin version " + VERSION);
+        return null;
     };
 
-    let destPath: string = "/usr/local/bin/" + binPath;
+    let positional: []string = cli.getPositional();
 
-    if (os.fileExists(destPath)) {
-        warn "The binary " + binPath + " already exists in /usr/local/bin/";
+    if (::len(positional) == 0) {
+        error "No source file specified";
+    };
 
-        if (::not(term.confirm("Do you want to overwrite it?"))) {
-            info "Aborting...";
-            return nil;
+    let srcPath: string = positional[0];
+
+    if (::not(file_ops.exists(srcPath))) {
+        error "Source file not found: " + srcPath;
+    };
+
+    let outFlag: string = getFlagValue("--output");
+    if (outFlag == "") {
+        outFlag = getFlagValue("-o");
+    };
+
+    let destName: string;
+    if (outFlag != null && outFlag != "") {
+        destName = outFlag;
+    } else {
+        destName = file_ops.getBasename(srcPath);
+    };
+
+    let destPath: string = DEST_DIR + "/" + destName;
+
+    let force: bool = hasFlag("-f") || hasFlag("--force");
+    let noBackup: bool = hasFlag("--no-backup");
+
+    if (file_ops.exists(destPath)) {
+        if (::not(force)) {
+            let confirmed: bool = term.confirm("Destination already exists. Overwrite?");
+            if (::not(confirmed)) {
+                ::println("Aborted.");
+                return null;
+            };
         };
 
-        info "Overwriting...";
-        shell.run("sudo rm " + destPath);
+        if (::not(noBackup)) {
+            ::println("Creating backup...");
+            let backupPath: string = file_ops.backupAndRemoveExisting(destPath);
+            ::println("Backup created: " + backupPath);
+        } else {
+            ::println("Removing existing file (no backup requested)...");
+            file_ops.deleteFile(destPath);
+        };
     };
 
-    shell.run("sudo mv " + binPath + " " + destPath);
-    success "Moved to /usr/local/bin/";
+    file_ops.copyFile(srcPath, destPath);
+    file_ops.makeExecutable(destPath);
+
+    success "Successfully installed: " + destPath;
 };
